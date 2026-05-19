@@ -37,7 +37,7 @@ import 'package:mangayomi/modules/widgets/custom_draggable_tabbar.dart';
 import 'package:mangayomi/modules/widgets/progress_center.dart';
 import 'package:mangayomi/providers/l10n_providers.dart';
 import 'package:mangayomi/providers/storage_provider.dart';
-import 'package:mangayomi/services/aniskip.dart';
+import 'package:mangayomi/services/aniskip.dart' as aniskip;
 import 'package:mangayomi/services/fetch_subtitles.dart';
 import 'package:mangayomi/services/get_video_list.dart';
 import 'package:mangayomi/services/torrent_server.dart';
@@ -285,8 +285,8 @@ class _AnimeStreamPageState extends riv.ConsumerState<AnimeStreamPage>
   late final ValueNotifier<_AniSkipPhase> _skipPhase = ValueNotifier(
     _AniSkipPhase.none,
   );
-  Results? _openingResult;
-  Results? _endingResult;
+  aniskip.Results? _openingResult;
+  aniskip.Results? _endingResult;
   bool _hasOpeningSkip = false;
   bool _hasEndingSkip = false;
   bool _initSubtitleAndAudio = true;
@@ -936,8 +936,8 @@ mp.register_script_message('call_button_${button.id}_long', button${button.id}lo
     if (firstVid != null) {
       if (firstVid.introStart != null && firstVid.introEnd != null) {
         _hasOpeningSkip = true;
-        _openingResult = Results(
-          interval: Interval(
+        _openingResult = aniskip.Results(
+          interval: aniskip.Interval(
             startTime: firstVid.introStart,
             endTime: firstVid.introEnd,
           ),
@@ -946,8 +946,8 @@ mp.register_script_message('call_button_${button.id}_long', button${button.id}lo
       }
       if (firstVid.outroStart != null && firstVid.outroEnd != null) {
         _hasEndingSkip = true;
-        _endingResult = Results(
-          interval: Interval(
+        _endingResult = aniskip.Results(
+          interval: aniskip.Interval(
             startTime: firstVid.outroStart,
             endTime: firstVid.outroEnd,
           ),

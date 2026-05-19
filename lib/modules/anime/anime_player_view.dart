@@ -929,17 +929,50 @@ mp.register_script_message('call_button_${button.id}_long', button${button.id}lo
 
   Future<void> _initAniSkip() async {
     await _player.stream.buffer.first;
+
+    // Use skip timestamps embedded in the Video object by the extension (e.g. Animetsu).
+    // These are used immediately and will be overridden if the AniSkip API returns data.
+    final firstVid = widget.videos.isNotEmpty ? widget.videos.first : null;
+    if (firstVid != null) {
+      if (firstVid.introStart != null && firstVid.introEnd != null) {
+        _hasOpeningSkip = true;
+        _openingResult = Results(
+          interval: Interval(
+            startTime: firstVid.introStart,
+            endTime: firstVid.introEnd,
+          ),
+          skipType: 'op',
+        );
+      }
+      if (firstVid.outroStart != null && firstVid.outroEnd != null) {
+        _hasEndingSkip = true;
+        _endingResult = Results(
+          interval: Interval(
+            startTime: firstVid.outroStart,
+            endTime: firstVid.outroEnd,
+          ),
+          skipType: 'ed',
+        );
+      }
+      if ((_hasOpeningSkip || _hasEndingSkip) && mounted) setState(() {});
+    }
+
+    // Also try the AniSkip API — overrides embedded data when available.
     _streamController.getAniSkipResults((result) {
       final openingRes = result
           .where((element) => element.skipType == "op")
           .toList();
-      _hasOpeningSkip = openingRes.isNotEmpty;
-      if (_hasOpeningSkip) _openingResult = openingRes.first;
+      if (openingRes.isNotEmpty) {
+        _hasOpeningSkip = true;
+        _openingResult = openingRes.first;
+      }
       final endingRes = result
           .where((element) => element.skipType == "ed")
           .toList();
-      _hasEndingSkip = endingRes.isNotEmpty;
-      if (_hasEndingSkip) _endingResult = endingRes.first;
+      if (endingRes.isNotEmpty) {
+        _hasEndingSkip = true;
+        _endingResult = endingRes.first;
+      }
       if (mounted) {
         setState(() {});
       }

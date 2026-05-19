@@ -7,6 +7,10 @@ class Video {
   Map<String, String>? headers;
   List<Track>? subtitles;
   List<Track>? audios;
+  double? introStart;
+  double? introEnd;
+  double? outroStart;
+  double? outroEnd;
 
   Video(
     this.url,
@@ -15,6 +19,10 @@ class Video {
     this.headers,
     this.subtitles,
     this.audios,
+    this.introStart,
+    this.introEnd,
+    this.outroStart,
+    this.outroEnd,
   });
   factory Video.fromJson(Map<String, dynamic> json) {
     return Video(
@@ -28,6 +36,10 @@ class Video {
       audios: json['audios'] != null
           ? (json['audios'] as List).map((e) => Track.fromJson(e)).toList()
           : [],
+      introStart: (json['introStart'] as num?)?.toDouble(),
+      introEnd: (json['introEnd'] as num?)?.toDouble(),
+      outroStart: (json['outroStart'] as num?)?.toDouble(),
+      outroEnd: (json['outroEnd'] as num?)?.toDouble(),
     );
   }
   Map<String, dynamic> toJson() => {
@@ -37,6 +49,10 @@ class Video {
     'headers': headers,
     'subtitles': subtitles?.map((e) => e.toJson()).toList(),
     'audios': audios?.map((e) => e.toJson()).toList(),
+    if (introStart != null) 'introStart': introStart,
+    if (introEnd != null) 'introEnd': introEnd,
+    if (outroStart != null) 'outroStart': outroStart,
+    if (outroEnd != null) 'outroEnd': outroEnd,
   };
 }
 

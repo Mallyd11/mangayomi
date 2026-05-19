@@ -954,7 +954,10 @@ mp.register_script_message('call_button_${button.id}_long', button${button.id}lo
           skipType: 'ed',
         );
       }
-      if ((_hasOpeningSkip || _hasEndingSkip) && mounted) setState(() {});
+      if (_hasOpeningSkip || _hasEndingSkip) {
+        _updateSkipChapterMarks();
+        if (mounted) setState(() {});
+      }
     }
 
     // Also try the AniSkip API — overrides embedded data when available.
@@ -973,10 +976,28 @@ mp.register_script_message('call_button_${button.id}_long', button${button.id}lo
         _hasEndingSkip = true;
         _endingResult = endingRes.first;
       }
+      _updateSkipChapterMarks();
       if (mounted) {
         setState(() {});
       }
     });
+  }
+
+  // Add intro/outro intervals as scrubber markers so they're visible on the
+  // progress bar (white tick marks), merged with any existing chapter marks.
+  void _updateSkipChapterMarks() {
+    final existing = _chapterMarks.value
+        .where((m) => m.$1 != 'Intro' && m.$1 != 'Outro')
+        .toList();
+    final skipMarks = <(String, int)>[];
+    if (_hasOpeningSkip && _openingResult?.interval?.startTime != null) {
+      skipMarks.add(('Intro', (_openingResult!.interval!.startTime! * 1000).toInt()));
+    }
+    if (_hasEndingSkip && _endingResult?.interval?.startTime != null) {
+      skipMarks.add(('Outro', (_endingResult!.interval!.startTime! * 1000).toInt()));
+    }
+    _chapterMarks.value = [...existing, ...skipMarks]
+      ..sort((a, b) => a.$2.compareTo(b.$2));
   }
 
   @override
